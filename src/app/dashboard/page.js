@@ -66,26 +66,26 @@ export default function DashboardPage() {
   }, []);
 
   // LOGOUT
- const handleLogout = () => {
+  const handleLogout = () => {
 
-  const confirmLogout =
-    window.confirm(
-      "Are you sure you want to logout?"
+    const confirmLogout =
+      window.confirm(
+        "Are you sure you want to logout?"
+      );
+
+    if (!confirmLogout) return;
+
+    localStorage.removeItem(
+      "admin"
     );
 
-  if (!confirmLogout) return;
+    document.cookie =
+      "admin=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
 
-  localStorage.removeItem(
-    "admin"
-  );
+    alert("Logout Successful");
 
-  document.cookie =
-    "admin=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
-
-  alert("Logout Successful");
-
-  router.replace("/login");
-};
+    router.replace("/login");
+  };
 
   // ADD SLIDE
   const handleAddSlide = async (
@@ -334,11 +334,24 @@ export default function DashboardPage() {
                   key={slide._id}
                   className="bg-[#FCFCFD] rounded-2xl overflow-hidden border border-[#E2E8F0] shadow-sm"
                 >
-                  <img
-                    src={`/uploads/${slide.image}`}
-                    alt="slide"
-                    className="w-full h-28 object-cover"
-                  />
+                  {slide.image.match(
+                    /\.(mp4|webm|ogg)$/i
+                  ) ? (
+
+                    <video
+                      src={`/uploads/${slide.image}`}
+                      className="w-full h-28 object-cover"
+                      muted
+                    />
+
+                  ) : (
+
+                    <img
+                      src={`/uploads/${slide.image}`}
+                      alt="slide"
+                      className="w-full h-28 object-cover"
+                    />
+                  )}
                 </div>
               ))}
           </div>
@@ -446,11 +459,24 @@ export default function DashboardPage() {
 
                         <div className="flex justify-center">
 
-                          <img
-                            src={`/uploads/${slide.image}`}
-                            alt="slide"
-                            className="w-24 h-16 object-cover rounded-lg"
-                          />
+                          {slide.image.match(
+                            /\.(mp4|webm|ogg)$/i
+                          ) ? (
+
+                            <video
+                              src={`/uploads/${slide.image}`}
+                              className="w-24 h-16 object-cover rounded-lg"
+                              muted
+                            />
+
+                          ) : (
+
+                            <img
+                              src={`/uploads/${slide.image}`}
+                              alt="slide"
+                              className="w-24 h-16 object-cover rounded-lg"
+                            />
+                          )}
                         </div>
                       </td>
 
@@ -478,11 +504,10 @@ export default function DashboardPage() {
                                 slide._id
                               )
                             }
-                            className={`px-3 py-1 rounded-xl text-white text-sm transition ${
-                              slide.isVisible
-                                ? "bg-[#F59E0B]"
-                                : "bg-[#6366F1]"
-                            }`}
+                            className={`px-3 py-1 rounded-xl text-white text-sm transition ${slide.isVisible
+                              ? "bg-[#F59E0B]"
+                              : "bg-[#6366F1]"
+                              }`}
                           >
                             {slide.isVisible
                               ? "Hide"
@@ -588,7 +613,7 @@ export default function DashboardPage() {
               {/* IMAGE */}
               <input
                 type="file"
-                accept="image/*"
+                accept="image/*,video/mp4,video/webm"
                 className="w-full text-sm text-[#4B5563]"
                 onChange={(e) =>
                   setImage(

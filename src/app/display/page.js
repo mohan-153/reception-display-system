@@ -6,11 +6,7 @@ import {
   useRef,
 } from "react";
 
-import { useRouter } from "next/navigation";
-
 export default function DisplayPage() {
-
-  const router = useRouter();
 
   const [slides, setSlides] =
     useState([]);
@@ -21,37 +17,48 @@ export default function DisplayPage() {
   const [currentTime, setCurrentTime] =
     useState(new Date());
 
-  const screenRef = useRef(null);
+  const screenRef =
+    useRef(null);
 
   // FETCH SLIDES
-  const fetchSlides = async () => {
+  const fetchSlides =
+    async () => {
 
-    try {
+      try {
 
-      const res = await fetch(
-        "/api/slides/get"
-      );
+        const res =
+          await fetch(
+            "/api/slides/get"
+          );
 
-      const data = await res.json();
+        const data =
+          await res.json();
 
-      // SHOW ONLY VISIBLE SLIDES
-      const visibleSlides =
-        data.filter(
-          (slide) =>
-            slide.isVisible
+        // ONLY VISIBLE
+        const visibleSlides =
+          data.filter(
+            (slide) =>
+              slide.isVisible
+          );
+
+        // SORT ORDER
+        visibleSlides.sort(
+          (a, b) =>
+            Number(a.order) -
+            Number(b.order)
         );
 
-      setSlides(
-        visibleSlides
-      );
+        setSlides(
+          visibleSlides
+        );
 
-    } catch (error) {
+      } catch (error) {
 
-      console.log(error);
-    }
-  };
+        console.log(error);
+      }
+    };
 
-  // LOAD SLIDES + FULLSCREEN
+  // LOAD PAGE
   useEffect(() => {
 
     fetchSlides();
@@ -79,31 +86,57 @@ export default function DisplayPage() {
 
   }, []);
 
-  // AUTO SLIDE CHANGE
+  // NEXT SLIDE
+  const goToNextSlide =
+    () => {
+
+      setCurrentSlide(
+        (prev) =>
+          prev ===
+          slides.length - 1
+            ? 0
+            : prev + 1
+      );
+    };
+
+  // AUTO IMAGE CHANGE
   useEffect(() => {
 
-    if (slides.length === 0)
+    if (
+      slides.length === 0
+    )
       return;
 
-    const interval =
-      setInterval(() => {
+    const currentFile =
+      slides[currentSlide]
+        .image;
 
-        setCurrentSlide(
-          (prev) =>
-            prev ===
-              slides.length - 1
-              ? 0
-              : prev + 1
-        );
-
-      }, 5000);
-
-    return () =>
-      clearInterval(
-        interval
+    // CHECK VIDEO
+    const isVideo =
+      currentFile.match(
+        /\.(mp4|webm|ogg)$/i
       );
 
-  }, [slides]);
+    // IMAGE TIMER
+    if (!isVideo) {
+
+      const interval =
+        setTimeout(() => {
+
+          goToNextSlide();
+
+        }, 5000);
+
+      return () =>
+        clearTimeout(
+          interval
+        );
+    }
+
+  }, [
+    currentSlide,
+    slides,
+  ]);
 
   // LIVE CLOCK
   useEffect(() => {
@@ -122,7 +155,7 @@ export default function DisplayPage() {
 
   }, []);
 
-  // TIME FORMAT
+  // TIME
   const time =
     currentTime.toLocaleTimeString(
       "en-IN",
@@ -134,7 +167,7 @@ export default function DisplayPage() {
       }
     );
 
-  // DATE FORMAT
+  // DATE
   const date =
     currentTime.toLocaleDateString(
       "en-IN",
@@ -148,29 +181,29 @@ export default function DisplayPage() {
 
   // BACK BUTTON
   const handleBack =
-    async () => {
+    () => {
 
-      try {
+      if (
+        document.fullscreenElement
+      ) {
 
-        if (
-          document.fullscreenElement
-        ) {
+        document
+          .exitFullscreen()
+          .then(() => {
 
-          await document.exitFullscreen();
-        }
+            window.close();
 
-      } catch (error) {
+          });
+      } else {
 
-        console.log(error);
+        window.close();
       }
-
-      router.push(
-        "/dashboard"
-      );
     };
 
   // NO SLIDES
-  if (slides.length === 0) {
+  if (
+    slides.length === 0
+  ) {
 
     return (
       <div className="w-full h-screen flex justify-center items-center bg-black text-white text-3xl font-bold">
@@ -182,44 +215,65 @@ export default function DisplayPage() {
   return (
     <div
       ref={screenRef}
-      className="w-full h-screen overflow-hidden bg-black"
+      className="w-full h-screen overflow-hidden bg-black cursor-none"
     >
 
       <div className="w-full h-full relative">
 
-        {/* IMAGE */}
-        <img
-          src={`/uploads/${slides[currentSlide].image}`}
-          alt="slide"
-          className="w-full h-full object-cover"
-        />
+        {/* IMAGE / VIDEO */}
+        {slides[
+          currentSlide
+        ].image.match(
+          /\.(mp4|webm|ogg)$/i
+        ) ? (
+
+          <video
+            src={`/uploads/${slides[currentSlide].image}`}
+            autoPlay
+            muted
+            playsInline
+            onEnded={
+              goToNextSlide
+            }
+            className="w-full h-full object-cover"
+          />
+
+        ) : (
+
+          <img
+            src={`/uploads/${slides[currentSlide].image}`}
+            alt="slide"
+            className="w-full h-full object-cover"
+          />
+        )}
 
         {/* OVERLAY */}
         <div className="absolute inset-0 bg-black/35">
 
-          {/* HOVER BACK BUTTON */}
+          {/* HOVER CLOSE BUTTON */}
           <div className="absolute top-0 right-0 w-28 h-20 z-50 group">
 
             <button
-              onClick={handleBack}
+              onClick={
+                handleBack
+              }
               className="
-      absolute
-      top-4
-      right-5
-      text-white/0
-      group-hover:text-white/80
-      hover:text-white
-      text-5xl
-      font-light
-      transition-all
-      duration-300
-      opacity-0
-      group-hover:opacity-100
-    "
+                absolute
+                top-4
+                right-5
+                text-white/0
+                group-hover:text-white/80
+                hover:text-white
+                text-5xl
+                font-light
+                transition-all
+                duration-300
+                opacity-0
+                group-hover:opacity-100
+              "
             >
               ×
             </button>
-
           </div>
 
           {/* LOGO */}
@@ -237,11 +291,13 @@ export default function DisplayPage() {
 
             {/* TIME */}
             <h1 className="text-5xl font-extrabold tracking-wider drop-shadow-2xl">
+
               {time}
             </h1>
 
             {/* DATE */}
             <p className="text-lg mt-1 font-medium drop-shadow-xl">
+
               {date}
             </p>
           </div>
@@ -251,12 +307,23 @@ export default function DisplayPage() {
 
             {/* TITLE */}
             <h1 className="text-white text-6xl font-extrabold mb-4 drop-shadow-2xl">
-              {slides[currentSlide].title}
+
+              {
+                slides[
+                  currentSlide
+                ].title
+              }
             </h1>
 
             {/* DESCRIPTION */}
             <p className="text-white text-2xl leading-relaxed drop-shadow-2xl">
-              {slides[currentSlide].description}
+
+              {
+                slides[
+                  currentSlide
+                ]
+                  .description
+              }
             </p>
           </div>
         </div>
