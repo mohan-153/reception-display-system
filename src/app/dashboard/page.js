@@ -56,7 +56,7 @@
           localStorage.getItem("admin");
 
         if (admin !== "true") {
-          router.replace("/login");
+          router.push("/login");
           return;
         }
 

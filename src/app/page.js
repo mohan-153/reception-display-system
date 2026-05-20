@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { useRouter } from "next/navigation";
 
@@ -39,6 +39,23 @@ export default function HomePage() {
       title: "",
       message: "",
     });
+
+  // CHECK LOGIN
+  useEffect(() => {
+
+    const admin =
+      localStorage.getItem(
+        "admin"
+      );
+
+    if (admin === "true") {
+
+      router.replace(
+        "/dashboard"
+      );
+    }
+
+  }, []);
 
   // TOAST
   const showToast = (
@@ -142,19 +159,22 @@ export default function HomePage() {
       // SUCCESS
       if (data.success) {
 
+        // LOCAL STORAGE
         localStorage.setItem(
           "admin",
           "true"
         );
 
+        // COOKIE TOKEN
         document.cookie =
-          "admin=true; path=/;";
+          "admin=true; path=/; max-age=86400;";
 
         showToast(
           "Login Success",
           "Welcome Admin"
         );
 
+        // REDIRECT
         setTimeout(() => {
 
           router.replace(

@@ -155,7 +155,7 @@ export default function DisplayPage() {
 
   }, []);
 
-  // TIME
+  // TIME FORMAT
   const time =
     currentTime.toLocaleTimeString(
       "en-IN",
@@ -167,7 +167,7 @@ export default function DisplayPage() {
       }
     );
 
-  // DATE
+  // DATE FORMAT
   const date =
     currentTime.toLocaleDateString(
       "en-IN",
@@ -181,22 +181,22 @@ export default function DisplayPage() {
 
   // BACK BUTTON
   const handleBack =
-    () => {
+    async () => {
 
-      if (
-        document.fullscreenElement
-      ) {
+      try {
 
-        document
-          .exitFullscreen()
-          .then(() => {
+        if (
+          document.fullscreenElement
+        ) {
 
-            window.close();
+          await document.exitFullscreen();
+        }
 
-          });
-      } else {
+        window.history.back();
 
-        window.close();
+      } catch (error) {
+
+        console.log(error);
       }
     };
 
@@ -213,9 +213,10 @@ export default function DisplayPage() {
   }
 
   return (
+
     <div
       ref={screenRef}
-      className="w-full h-screen overflow-hidden bg-black cursor-none"
+      className="w-full h-screen overflow-hidden bg-black"
     >
 
       <div className="w-full h-full relative">
@@ -247,16 +248,24 @@ export default function DisplayPage() {
           />
         )}
 
-        {/* OVERLAY */}
+        {/* DARK OVERLAY */}
         <div className="absolute inset-0 bg-black/35">
 
           {/* HOVER CLOSE BUTTON */}
-          <div className="absolute top-0 right-0 w-28 h-20 z-50 group">
+          <div
+            className="
+              absolute
+              top-0
+              right-0
+              w-28
+              h-20
+              z-50
+              group
+            "
+          >
 
             <button
-              onClick={
-                handleBack
-              }
+              onClick={handleBack}
               className="
                 absolute
                 top-4
@@ -270,6 +279,7 @@ export default function DisplayPage() {
                 duration-300
                 opacity-0
                 group-hover:opacity-100
+                cursor-pointer
               "
             >
               ×
