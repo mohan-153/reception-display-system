@@ -104,14 +104,15 @@ export default function DisplayPage() {
 
     if (
       slides.length === 0
-    )
+    ) {
       return;
+    }
 
     const currentFile =
       slides[currentSlide]
         .image;
 
-    // CHECK VIDEO
+    // VIDEO CHECK
     const isVideo =
       currentFile.match(
         /\.(mp4|webm|ogg)$/i
@@ -248,7 +249,7 @@ export default function DisplayPage() {
           />
         )}
 
-        {/* DARK OVERLAY */}
+        {/* OVERLAY */}
         <div className="absolute inset-0 bg-black/35">
 
           {/* HOVER CLOSE BUTTON */}
@@ -300,7 +301,7 @@ export default function DisplayPage() {
           <div className="absolute top-5 right-8 text-white text-right">
 
             {/* TIME */}
-            <h1 className="text-5xl font-extrabold tracking-wider drop-shadow-2xl">
+            <h1 className="text-4xl font-extrabold tracking-wider drop-shadow-2xl">
 
               {time}
             </h1>

@@ -1,290 +1,98 @@
-    "use client";
+"use client";
 
-    import { useEffect, useState } from "react";
-    import { useRouter } from "next/navigation";
-    import Image from "next/image";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 
-    export default function DashboardPage() {
-      const router = useRouter();
+export default function DashboardPage() {
 
-      const [slides, setSlides] =
-        useState([]);
+  const router = useRouter();
 
-      const [loading, setLoading] =
-        useState(true);
+  const [slides, setSlides] =
+    useState([]);
 
-      const [showModal, setShowModal] =
-        useState(false);
+  const [loading, setLoading] =
+    useState(true);
 
-      const [title, setTitle] =
-        useState("");
+  const [showModal, setShowModal] =
+    useState(false);
 
-      const [description, setDescription] =
-        useState("");
+  const [title, setTitle] =
+    useState("");
 
-      const [image, setImage] =
-        useState(null);
+  const [description, setDescription] =
+    useState("");
 
-      const [order, setOrder] =
-        useState("");
+  const [image, setImage] =
+    useState(null);
 
-      const [editId, setEditId] =
-        useState(null);
+  const [order, setOrder] =
+    useState("");
 
-      const [editMode, setEditMode] =
-        useState(false);
+  const [editId, setEditId] =
+    useState(null);
 
-      // FETCH SLIDES
-      const fetchSlides = async () => {
-        try {
-          const res = await fetch(
-            "/api/slides/get"
-          );
+  const [editMode, setEditMode] =
+    useState(false);
 
-          const data = await res.json();
+  // FETCH SLIDES
+  const fetchSlides = async () => {
 
-          setSlides(
-            Array.isArray(data) ? data : []
-          );
-        } catch (error) {
-          console.log(error);
-        }
-      };
+    try {
 
-      useEffect(() => {
-        const admin =
-          localStorage.getItem("admin");
-
-        if (admin !== "true") {
-          router.push("/login");
-          return;
-        }
-
-        fetchSlides();
-
-        setLoading(false);
-      }, []);
-
-      // LOGOUT
-      const handleLogout = () => {
-
-        const confirmLogout =
-          window.confirm(
-            "Are you sure you want to logout?"
-          );
-
-        if (!confirmLogout) return;
-
-        localStorage.removeItem(
-          "admin"
+      const res =
+        await fetch(
+          "/api/slides/get"
         );
 
-        document.cookie =
-          "admin=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+      const data =
+        await res.json();
 
-        alert("Logout Successful");
+      setSlides(
+        Array.isArray(data)
+          ? data
+          : []
+      );
+
+    } catch (error) {
+
+      console.log(error);
+    }
+  };
+
+  // LOAD DATA
+  useEffect(() => {
+
+    fetchSlides();
+
+    setLoading(false);
+
+  }, []);
+
+  // LOGOUT
+  const handleLogout =
+    async () => {
+
+      try {
+
+        await fetch(
+          "/api/logout",
+          {
+            method: "POST",
+          }
+        );
 
         router.replace("/");
-      };
 
-      // ADD SLIDE
-      const handleAddSlide = async (
-        e
-      ) => {
-        e.preventDefault();
+      } catch (error) {
 
-        try {
-          const formData =
-            new FormData();
-
-          formData.append(
-            "order",
-            order
-          );
-
-          formData.append(
-            "title",
-            title
-          );
-
-          formData.append(
-            "description",
-            description
-          );
-
-          if (image) {
-            formData.append(
-              "image",
-              image
-            );
-          }
-
-          const res = await fetch(
-            "/api/slides/add",
-            {
-              method: "POST",
-              body: formData,
-            }
-          );
-
-          const data =
-            await res.json();
-
-          if (data.success) {
-            alert("Slide Added");
-
-            setShowModal(false);
-
-            setTitle("");
-
-            setDescription("");
-
-            setImage(null);
-
-            setOrder("");
-
-            fetchSlides();
-          }
-        } catch (error) {
-          console.log(error);
-        }
-      };
-
-      // EDIT BUTTON
-      const handleEdit = (slide) => {
-        setEditMode(true);
-
-        setEditId(slide._id);
-
-        setOrder(slide.order);
-
-        setTitle(slide.title);
-
-        setDescription(
-          slide.description
-        );
-
-        setShowModal(true);
-      };
-
-      // UPDATE SLIDE
-      const handleUpdateSlide =
-        async (e) => {
-          e.preventDefault();
-
-          try {
-            const formData =
-              new FormData();
-
-            formData.append(
-              "id",
-              editId
-            );
-
-            formData.append(
-              "order",
-              order
-            );
-
-            formData.append(
-              "title",
-              title
-            );
-
-            formData.append(
-              "description",
-              description
-            );
-
-            if (image) {
-              formData.append(
-                "image",
-                image
-              );
-            }
-
-            const res = await fetch(
-              "/api/slides/update",
-              {
-                method: "PUT",
-                body: formData,
-              }
-            );
-
-            const data =
-              await res.json();
-
-            if (data.success) {
-              alert("Slide Updated");
-
-              setShowModal(false);
-
-              setEditMode(false);
-
-              setEditId(null);
-
-              setOrder("");
-
-              setTitle("");
-
-              setDescription("");
-
-              setImage(null);
-
-              fetchSlides();
-            }
-          } catch (error) {
-            console.log(error);
-          }
-        };
-
-      // TOGGLE SHOW / HIDE
-      const handleToggle = async (
-        id
-      ) => {
-        try {
-          await fetch(
-            `/api/slides/toggle?id=${id}`,
-            {
-              method: "PUT",
-            }
-          );
-
-          fetchSlides();
-        } catch (error) {
-          console.log(error);
-        }
-      };
-
-      // DELETE
-      const handleDelete = async (
-        id
-      ) => {
-        const confirmDelete =
-          confirm(
-            "Are you sure want to delete?"
-          );
-
-        if (!confirmDelete) return;
-
-        try {
-          await fetch(
-            `/api/slides/delete?id=${id}`,
-            {
-              method: "DELETE",
-            }
-          );
-
-          fetchSlides();
-        } catch (error) {
-          console.log(error);
-        }
-      };
-
-      if (loading) {
-        return null;
+        console.log(error);
       }
+  };
 
+  if (loading) {
+    return null;
+  }
       return (
         <div className="w-full min-h-screen bg-linear-to-br from-[#EEF2FF] via-[#E9EAFB] to-[#E5E7F5]">
 

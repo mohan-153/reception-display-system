@@ -1,49 +1,63 @@
 import { NextResponse } from "next/server";
 
+import { createToken } from "@/lib/auth";
+
 export async function POST(req) {
+
   try {
-    const body = await req.json();
 
-    const { email, password } = body;
+    const {
+      email,
+      password,
+    } = await req.json();
 
-    // EMAIL CHECK
+    // STATIC ADMIN
     if (
-      email !== process.env.ADMIN_EMAIL
+      email ===
+        "admin@gmail.com" &&
+      password === "admin123"
     ) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Invalid email",
-        },
-        { status: 401 }
-      );
-    }
 
-    // PASSWORD CHECK
-    if (
-      password !==
-      process.env.ADMIN_PASSWORD
-    ) {
-      return NextResponse.json(
+      // CREATE TOKEN
+      const token =
+        createToken({
+          email,
+        });
+
+      const response =
+        NextResponse.json({
+          success: true,
+        });
+
+      // SAVE COOKIE
+      response.cookies.set(
+        "token",
+        token,
         {
-          success: false,
-          message: "Invalid password",
-        },
-        { status: 401 }
+          httpOnly: true,
+          secure: false,
+          sameSite: "strict",
+          path: "/",
+          maxAge:
+            60 * 60 * 24,
+        }
       );
+
+      return response;
     }
 
     return NextResponse.json({
-      success: true,
-      message: "Login Successful",
+      success: false,
+      message:
+        "Invalid Credentials",
     });
+
   } catch (error) {
-    return NextResponse.json(
-      {
-        success: false,
-        message: "Server Error",
-      },
-      { status: 500 }
-    );
+
+    return NextResponse.json({
+      success: false,
+      message:
+        "Server Error",
+    });
   }
 }

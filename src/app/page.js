@@ -43,12 +43,16 @@ export default function HomePage() {
   // CHECK LOGIN
   useEffect(() => {
 
-    const admin =
-      localStorage.getItem(
-        "admin"
-      );
+    const hasCookie =
+      document.cookie
+        .split("; ")
+        .find((row) =>
+          row.startsWith(
+            "admin="
+          )
+        );
 
-    if (admin === "true") {
+    if (hasCookie) {
 
       router.replace(
         "/dashboard"
@@ -121,15 +125,6 @@ export default function HomePage() {
 
       valid = false;
 
-    } else if (
-      password.length < 5
-    ) {
-
-      setPasswordError(
-        "Password must be minimum 5 characters"
-      );
-
-      valid = false;
     }
 
     if (!valid) return;
@@ -157,32 +152,22 @@ export default function HomePage() {
         await res.json();
 
       // SUCCESS
-      if (data.success) {
+      // SUCCESS
+if (data.success) {
 
-        // LOCAL STORAGE
-        localStorage.setItem(
-          "admin",
-          "true"
-        );
+  showToast(
+    "Login Success",
+    "Welcome Admin"
+  );
 
-        // COOKIE TOKEN
-        document.cookie =
-          "admin=true; path=/; max-age=86400;";
+  setTimeout(() => {
 
-        showToast(
-          "Login Success",
-          "Welcome Admin"
-        );
+    router.replace(
+      "/dashboard"
+    );
 
-        // REDIRECT
-        setTimeout(() => {
-
-          router.replace(
-            "/dashboard"
-          );
-
-        }, 1200);
-      }
+  }, 1000);
+}
 
       // FAILED
       else {
@@ -206,11 +191,6 @@ export default function HomePage() {
 
     <div className="w-full min-h-screen flex bg-gradient-to-br from-[#343255] via-[#4C1D95] to-[#7C3AED] overflow-hidden relative">
 
-      {/* BACKGROUND BLUR */}
-      <div className="absolute w-[500px] h-[500px] bg-violet-400/20 rounded-full blur-3xl top-[-100px] left-[-100px]" />
-
-      <div className="absolute w-[400px] h-[400px] bg-purple-300/20 rounded-full blur-3xl bottom-[-100px] right-[-100px]" />
-
       {/* TOAST */}
       {toast.show && (
 
@@ -218,7 +198,6 @@ export default function HomePage() {
 
           <div className="flex items-start gap-3">
 
-            {/* ICON */}
             <div className="mt-1">
 
               {toast.title ===
@@ -232,7 +211,6 @@ export default function HomePage() {
               )}
             </div>
 
-            {/* CONTENT */}
             <div>
 
               <h2 className="text-xl font-bold">
@@ -258,10 +236,9 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* LEFT SIDE */}
-      <div className="w-1/2 hidden lg:flex flex-col justify-center px-20 text-white relative z-10">
+      {/* LEFT */}
+      <div className="w-1/2 hidden lg:flex flex-col justify-center px-20 text-white">
 
-        {/* LOGO */}
         <div className="mb-10">
 
           <Image
@@ -274,65 +251,26 @@ export default function HomePage() {
           />
         </div>
 
-        {/* TITLE */}
         <h1 className="text-6xl font-extrabold leading-tight">
-
           Reception <br />
-
           Display System
         </h1>
 
-        {/* SUBTITLE */}
         <p className="mt-8 text-xl text-gray-200 leading-9 max-w-[600px]">
-
           Professional digital signage
           and reception display
-          management system for
-          offices, institutions,
-          companies, and smart
-          environments.
-
+          management system.
         </p>
-
-        {/* FEATURES */}
-        <div className="mt-10 space-y-4 text-lg text-gray-300">
-
-          <div>
-            ✓ Image & Video Slide Support
-          </div>
-
-          <div>
-            ✓ Live Fullscreen Display
-          </div>
-
-          <div>
-            ✓ Real-Time Slide Management
-          </div>
-
-        </div>
       </div>
 
-      {/* RIGHT SIDE LOGIN */}
-      <div className="w-full lg:w-1/2 flex justify-center items-center p-10 relative z-10">
+      {/* LOGIN */}
+      <div className="w-full lg:w-1/2 flex justify-center items-center p-10">
 
         <form
           onSubmit={handleLogin}
           className="bg-[#1F1534]/95 border border-white/10 backdrop-blur-xl p-8 rounded-[28px] shadow-2xl w-full max-w-[430px]"
         >
 
-          {/* MOBILE LOGO */}
-          <div className="flex justify-center mb-6 lg:hidden">
-
-            <Image
-              src="/logo2.png"
-              alt="logo"
-              width={220}
-              height={80}
-              className="object-contain"
-            />
-          </div>
-
-          {/* TITLE */}
           <h1 className="text-4xl font-bold text-center mb-8 text-white">
             Admin Login
           </h1>
@@ -343,7 +281,7 @@ export default function HomePage() {
             <input
               type="email"
               placeholder="Email"
-              className="w-full bg-[#120D21] border border-[#2E2346] text-white placeholder:text-gray-400 p-4 rounded-2xl outline-none focus:border-[#8B5CF6] transition"
+              className="w-full bg-[#120D21] border border-[#2E2346] text-white placeholder:text-gray-400 p-4 rounded-2xl outline-none"
               value={email}
               onChange={(e) =>
                 setEmail(
@@ -353,7 +291,6 @@ export default function HomePage() {
             />
 
             {emailError && (
-
               <p className="text-[#FCA5A5] text-sm mt-2 text-center font-semibold">
                 ⚠ {emailError}
               </p>
@@ -372,7 +309,7 @@ export default function HomePage() {
                     : "password"
                 }
                 placeholder="Password"
-                className="w-full bg-[#120D21] border border-[#2E2346] text-white placeholder:text-gray-400 p-4 rounded-2xl outline-none focus:border-[#8B5CF6] transition"
+                className="w-full bg-[#120D21] border border-[#2E2346] text-white placeholder:text-gray-400 p-4 rounded-2xl outline-none"
                 value={password}
                 onChange={(e) =>
                   setPassword(
@@ -381,7 +318,6 @@ export default function HomePage() {
                 }
               />
 
-              {/* EYE ICON */}
               <button
                 type="button"
                 onClick={() =>
@@ -389,32 +325,27 @@ export default function HomePage() {
                     !showPassword
                   )
                 }
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
               >
 
                 {showPassword ? (
-
-                  <FaEyeSlash size={18} />
-
+                  <FaEyeSlash />
                 ) : (
-
-                  <FaEye size={18} />
+                  <FaEye />
                 )}
               </button>
             </div>
 
             {passwordError && (
-
               <p className="text-[#FCA5A5] text-sm mt-2 text-center font-semibold">
                 ⚠ {passwordError}
               </p>
             )}
           </div>
 
-          {/* BUTTON */}
           <button
             type="submit"
-            className="w-full bg-gradient-to-r from-[#8B5CF6] to-[#A855F7] hover:opacity-90 text-white p-4 rounded-2xl text-lg font-semibold shadow-lg transition"
+            className="w-full bg-gradient-to-r from-[#8B5CF6] to-[#A855F7] text-white p-4 rounded-2xl text-lg font-semibold"
           >
             Login
           </button>
