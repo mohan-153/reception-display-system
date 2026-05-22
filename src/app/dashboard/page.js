@@ -89,7 +89,228 @@ export default function DashboardPage() {
         console.log(error);
       }
   };
+// ADD SLIDE
+const handleAddSlide = async (
+  e
+) => {
 
+  e.preventDefault();
+
+  try {
+
+    const formData =
+      new FormData();
+
+    formData.append(
+      "order",
+      order
+    );
+
+    formData.append(
+      "title",
+      title
+    );
+
+    formData.append(
+      "description",
+      description
+    );
+
+    if (image) {
+
+      formData.append(
+        "image",
+        image
+      );
+    }
+
+    const res = await fetch(
+      "/api/slides/add",
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    const data =
+      await res.json();
+
+    if (data.success) {
+
+      alert("Slide Added");
+
+      setShowModal(false);
+
+      setOrder("");
+
+      setTitle("");
+
+      setDescription("");
+
+      setImage(null);
+
+      fetchSlides();
+    }
+
+  } catch (error) {
+
+    console.log(error);
+  }
+};
+
+// EDIT BUTTON
+const handleEdit = (
+  slide
+) => {
+
+  setEditMode(true);
+
+  setEditId(slide._id);
+
+  setOrder(slide.order);
+
+  setTitle(slide.title);
+
+  setDescription(
+    slide.description
+  );
+
+  setImage(null);
+
+  setShowModal(true);
+};
+
+// UPDATE SLIDE
+const handleUpdateSlide =
+  async (e) => {
+
+    e.preventDefault();
+
+    try {
+
+      const formData =
+        new FormData();
+
+      formData.append(
+        "id",
+        editId
+      );
+
+      formData.append(
+        "order",
+        order
+      );
+
+      formData.append(
+        "title",
+        title
+      );
+
+      formData.append(
+        "description",
+        description
+      );
+
+      if (image) {
+
+        formData.append(
+          "image",
+          image
+        );
+      }
+
+      const res =
+        await fetch(
+          "/api/slides/update",
+          {
+            method: "PUT",
+            body: formData,
+          }
+        );
+
+      const data =
+        await res.json();
+
+      if (data.success) {
+
+        alert(
+          "Slide Updated"
+        );
+
+        setShowModal(false);
+
+        setEditMode(false);
+
+        setEditId(null);
+
+        setOrder("");
+
+        setTitle("");
+
+        setDescription("");
+
+        setImage(null);
+
+        fetchSlides();
+      }
+
+    } catch (error) {
+
+      console.log(error);
+    }
+};
+
+// SHOW / HIDE
+const handleToggle = async (
+  id
+) => {
+
+  try {
+
+    await fetch(
+      `/api/slides/toggle?id=${id}`,
+      {
+        method: "PUT",
+      }
+    );
+
+    fetchSlides();
+
+  } catch (error) {
+
+    console.log(error);
+  }
+};
+
+// DELETE
+const handleDelete = async (
+  id
+) => {
+
+    const confirmDelete =
+      confirm(
+        "Are you sure want to delete?"
+      );
+
+    if (!confirmDelete)
+      return;
+
+    try {
+
+      await fetch(
+        `/api/slides/delete?id=${id}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      fetchSlides();
+
+    } catch (error) {
+
+      console.log(error);
+    }
+};
   if (loading) {
     return null;
   }
