@@ -1,58 +1,96 @@
 import { NextResponse } from "next/server";
 
+
+import User from "@/models/User";
+
+import bcrypt from "bcryptjs";
+
 import { createToken } from "@/lib/auth";
+import { connectToDatabase } from "@/lib/mongodb";
 
 export async function POST(req) {
 
   try {
+
+    await connectToDatabase();
 
     const {
       email,
       password,
     } = await req.json();
 
-    // STATIC ADMIN
-    if (
-      email ===
-        "admin@gmail.com" &&
-      password === "admin123"
-    ) {
+    // FIND USER
 
-      // CREATE TOKEN
-      const token =
-        createToken({
-          email,
-        });
+    const user =
+      await User.findOne({
+        email,
+      });
 
-      const response =
-        NextResponse.json({
-          success: true,
-        });
+    if (!user) {
 
-      // SAVE COOKIE
-      response.cookies.set(
-        "token",
-        token,
-        {
-          httpOnly: true,
-          secure: false,
-          sameSite: "strict",
-          path: "/",
-          maxAge:
-            60 * 60 * 24,
-        }
-      );
-
-      return response;
+      return NextResponse.json({
+        success: false,
+        message:
+          "User not found",
+      });
     }
 
-    return NextResponse.json({
-      success: false,
-      message:
-        "Invalid Credentials",
-    });
+    // CHECK PASSWORD
+
+    const isMatch =
+      await bcrypt.compare(
+        password,
+        user.password
+      );
+
+    if (!isMatch) {
+
+      return NextResponse.json({
+        success: false,
+        message:
+          "Invalid Password",
+      });
+    }
+
+    // CREATE JWT TOKEN
+
+    const token =
+      createToken({
+        id: user._id,
+        email: user.email,
+      });
+
+    // RESPONSE
+
+    const response =
+      NextResponse.json({
+        success: true,
+      });
+
+    // SAVE TOKEN COOKIE
+
+    response.cookies.set(
+      "token",
+      token,
+      {
+        httpOnly: true,
+
+        secure: false,
+
+        sameSite: "lax",
+
+        path: "/",
+
+        maxAge:
+          60 * 60 * 24,
+      }
+    );
+
+    return response;
 
   } catch (error) {
+
+    console.log(error);
 
     return NextResponse.json({
       success: false,

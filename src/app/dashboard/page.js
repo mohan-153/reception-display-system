@@ -82,7 +82,7 @@ export default function DashboardPage() {
           }
         );
 
-        router.replace("/");
+        router.replace("/login");
 
       } catch (error) {
 

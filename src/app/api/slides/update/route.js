@@ -102,6 +102,29 @@ export async function PUT(req) {
     currentSlide.description =
       description;
 
+      // DELETE OLD FILE
+
+if (file) {
+
+  const oldFilePath =
+    path.join(
+      process.cwd(),
+      "public",
+      "uploads",
+      slide.image
+    );
+
+  if (
+    fs.existsSync(
+      oldFilePath
+    )
+  ) {
+
+    fs.unlinkSync(
+      oldFilePath
+    );
+  }
+}
     // IMAGE UPDATE
     if (
       image &&
